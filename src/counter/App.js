@@ -1,42 +1,101 @@
-import { Component, useState } from 'react';
+import { Component, useEffect, useState } from 'react';
+import { Spinner } from './Spinner';
+import { ErrorMessage } from './ErrorMessage';
 import './App.css';
 
 export const App = () => {
 
-  const [counter, setCounter] = useState(0);
+  const [counter, setCounter] = useState(1);
+  const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+
+  const getResource = async (url) => {
+    let res = await fetch(url);
+    try { return await res.json() }
+    catch (err) {
+      new Error(`Could not fetch, status: ${res.status}`)
+    };
+  };
+
+  const getImage = async (id) => {
+    const res = await getResource(
+      `https://jsonplaceholder.typicode.com/photos/${id}`
+    );
+    return _transformPhoto(res);
+  };
+
+  const _transformPhoto = (photo) => {
+    return {
+      id: photo.id,
+      thumbnailUrl: photo.thumbnailUrl,
+    };
+  };
+
+  const onImageLoaded = (image) => {
+    setImage(image);
+    setLoading((loading) => false);
+  };
+
+  const onError = () => {
+    setLoading((loading) => false);
+    setError((error) => true);
+  }
+
+  const loadImage = (counter) => {
+    setLoading((loading) => true);
+
+    getImage(counter)
+      .then(onImageLoaded)
+      .catch(onError);
+  };
+
+  useEffect(() => {
+    loadImage(counter);
+  }, [counter]);
 
   const increaseCounter = () => {
-    if (counter < 10) {
+    if (counter < 20) {
       setCounter((counter) => counter + 1);
     };
   };
 
   const decreaseCounter = () => {
-    if (counter > -10) {
+    if (counter > 1) {
       setCounter((counter) => counter - 1);
     };
   };
 
   const randomCounter = () => {
-    setCounter(+(Math.random(counter) * (10 - -10) + -10).toFixed(0));
+    setCounter(+(Math.random(counter) * (20 - 1) + 1).toFixed(0));
   };
 
   const resetCounter = () => {
-    setCounter(0);
+    setCounter(1);
   };
 
   return (
     <div className="app">
-      <div className="counter">{counter}</div>
-      <div className="controls">
-        <button onClick={increaseCounter}>INC</button>
-        <button onClick={decreaseCounter}>DEC</button>
-        <button onClick={randomCounter}>RND</button>
-        <button onClick={resetCounter}>RESET</button>
-      </div>
+      {loading && <Spinner />}
+      {error && <ErrorMessage />}
+      {loading || error || !image ? null :
+        <>
+          <img src={image.thumbnailUrl} alt='placeholder-img' className='slide-img' />
+          <div className="counter">{counter}</div>
+          <div className="controls">
+            <button onClick={decreaseCounter}>DEC</button>
+            <button onClick={increaseCounter}>INC</button>
+            <button onClick={randomCounter}>RND</button>
+            <button onClick={resetCounter}>RESET</button>
+          </div>
+        </>
+      }
+
     </div>
   )
 };
+
+
 
 // export class App extends Component {
 //   constructor(props) {
