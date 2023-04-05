@@ -1,4 +1,4 @@
-import { Component, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Spinner } from './Spinner';
 import { ErrorMessage } from './ErrorMessage';
 import './App.css';
@@ -34,16 +34,16 @@ export const App = () => {
 
   const onImageLoaded = (image) => {
     setImage(image);
-    setLoading((loading) => false);
+    setLoading(false);
   };
 
   const onError = () => {
-    setLoading((loading) => false);
-    setError((error) => true);
+    setLoading(false);
+    setError(true);
   }
 
   const loadImage = (counter) => {
-    setLoading((loading) => true);
+    setLoading(true);
 
     getImage(counter)
       .then(onImageLoaded)
@@ -74,25 +74,22 @@ export const App = () => {
     setCounter(1);
   };
 
-  return (
-    <div className="app">
-      {loading && <Spinner />}
-      {error && <ErrorMessage />}
-      {loading || error || !image ? null :
-        <>
-          <img src={image.thumbnailUrl} alt='placeholder-img' className='slide-img' />
-          <div className="counter">{counter}</div>
-          <div className="controls">
-            <button onClick={decreaseCounter}>DEC</button>
-            <button onClick={increaseCounter}>INC</button>
-            <button onClick={randomCounter}>RND</button>
-            <button onClick={resetCounter}>RESET</button>
-          </div>
-        </>
-      }
-
-    </div>
-  )
+  if (loading) return <Spinner />;
+  if (error) return <ErrorMessage />;
+  if (image) {
+    return (
+      <div className="app">
+        <img src={image.thumbnailUrl} alt='placeholder-img' className='slide-img' />
+        <div className="counter">{counter}</div>
+        <div className="controls">
+          <button onClick={decreaseCounter}>DEC</button>
+          <button onClick={increaseCounter}>INC</button>
+          <button onClick={randomCounter}>RND</button>
+          <button onClick={resetCounter}>RESET</button>
+        </div>
+      </div>
+    );
+  };
 };
 
 
