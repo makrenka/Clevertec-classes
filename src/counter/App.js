@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Spinner } from './Spinner';
 import { ErrorMessage } from './ErrorMessage';
+
 import './App.css';
 
 export const App = () => {
