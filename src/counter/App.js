@@ -2,52 +2,22 @@ import { useEffect, useState } from 'react';
 import { Spinner } from './Spinner';
 import { ErrorMessage } from './ErrorMessage';
 import './App.css';
+import { useService } from './service';
 
 export const App = () => {
 
   const [counter, setCounter] = useState(1);
   const [image, setImage] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
 
-  const getResource = async (url) => {
-    let res = await fetch(url);
-    try { return await res.json() }
-    catch (err) {
-      new Error(`Could not fetch, status: ${res.status}`)
-    };
-  };
-
-  const getImage = async (id) => {
-    const res = await getResource(
-      `https://jsonplaceholder.typicode.com/photos/${id}`
-    );
-    return _transformPhoto(res);
-  };
-
-  const _transformPhoto = (photo) => {
-    return {
-      id: photo.id,
-      thumbnailUrl: photo.thumbnailUrl,
-    };
-  };
+  const { loading, error, clearError, getImage } = useService();
 
   const onImageLoaded = (image) => {
     setImage(image);
-    setLoading(false);
   };
 
-  const onError = () => {
-    setLoading(false);
-    setError(true);
-  }
-
   const loadImage = (counter) => {
-    setLoading(true);
-
-    getImage(counter)
-      .then(onImageLoaded)
-      .catch(onError);
+    clearError();
+    getImage(counter).then(onImageLoaded);
   };
 
   useEffect(() => {
