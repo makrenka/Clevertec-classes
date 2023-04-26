@@ -2,8 +2,10 @@ import { useEffect, useReducer, useState } from 'react';
 import { Spinner } from './Spinner';
 import { ErrorMessage } from './ErrorMessage';
 import { useService } from './service';
+import { reducer } from './reducer';
 
 import './App.css';
+
 
 export const App = () => {
 
@@ -13,38 +15,7 @@ export const App = () => {
 
   const { loading, error, clearError, getImage } = useService();
 
-  function reducer(state, action) {
-    switch (action.type) {
-      case 'increment':
-        if (state.count >= 20) { return { count: 20 } }
-        else {
-          return {
-            count: state.count + 1
-          }
-        };
-      case 'decrement':
-        if (state.count <= 1) { return { count: 1 } }
-        else {
-          return {
-            count: state.count - 1
-          }
-        };
-      case 'random':
-        setAutoplay(false);
-        return {
-          count: +(Math.random(state.count) * (20 - 1) + 1).toFixed(0)
-        };
-      case 'reset':
-        setAutoplay(false);
-        return {
-          count: 1
-        };
-      default:
-        throw new Error();
-    };
-  };
-
-  const [state, dispatch] = useReducer(reducer, { count: 1 })
+  const [state, dispatch] = useReducer(reducer, { count: 1 });
 
   const onImageLoaded = (image) => {
     setImage(image);
