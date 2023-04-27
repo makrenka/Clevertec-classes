@@ -2,10 +2,11 @@ import { useEffect, useReducer, useState } from 'react';
 import { Spinner } from './Spinner';
 import { ErrorMessage } from './ErrorMessage';
 import { useService } from './service';
-import { reducer } from './reducer';
+
+import { reducer } from '../store/reducer';
+import { setDecrement, setIncrement, setRandom, setReset } from '../store/actions';
 
 import './App.css';
-
 
 export const App = () => {
 
@@ -15,7 +16,7 @@ export const App = () => {
 
   const { loading, error, clearError, getImage } = useService();
 
-  const [state, dispatch] = useReducer(reducer, { count: 1 });
+  const [{ count }, dispatch] = useReducer(reducer, { count: 1 });
 
   const onImageLoaded = (image) => {
     setImage(image);
@@ -23,12 +24,12 @@ export const App = () => {
 
   const loadImage = () => {
     clearError();
-    getImage(state.count).then(onImageLoaded);
+    getImage(count).then(onImageLoaded);
   };
 
   useEffect(() => {
     loadImage();
-  }, [state.count]);
+  }, [count]);
 
   // const increaseCounter = () => {
   //   setAutoplay(false);
@@ -61,7 +62,7 @@ export const App = () => {
   useEffect(() => {
     if (!autoplay) return;
 
-    const interval = setInterval((() => dispatch({ type: 'increment' })), 3000);
+    const interval = setInterval((() => dispatch(setIncrement())), 3000);
 
     return () => {
       clearInterval(interval);
@@ -74,12 +75,12 @@ export const App = () => {
     return (
       <div className="app">
         <img src={image.thumbnailUrl} alt='placeholder-img' className='slide-img' />
-        <div className="counter">{state.count}</div>
+        <div className="counter">{count}</div>
         <div className="controls">
-          <button onClick={() => dispatch({ type: 'decrement' })}>-</button>
-          <button onClick={() => dispatch({ type: 'increment' })}>+</button>
-          <button onClick={() => dispatch({ type: 'random' })}>RND</button>
-          <button onClick={() => dispatch({ type: 'reset' })}>RESET</button>
+          <button onClick={() => dispatch(setDecrement())}>-</button>
+          <button onClick={() => dispatch(setIncrement())}>+</button>
+          <button onClick={() => dispatch(setRandom())}>RND</button>
+          <button onClick={() => dispatch(setReset())}>RESET</button>
           <button onClick={toggleAutoplay}>AUTOPLAY</button>
         </div>
       </div>
