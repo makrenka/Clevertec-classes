@@ -1,79 +1,73 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { Spinner } from './Spinner';
 import { ErrorMessage } from './ErrorMessage';
+import { useService } from './service';
+
+import { reducer } from '../store/reducer';
+import { setDecrement, setIncrement, setRandom, setReset } from '../store/actions';
 
 import './App.css';
 
 export const App = () => {
 
-  const [counter, setCounter] = useState(1);
+  // const [counter, setCounter] = useState(1);
   const [image, setImage] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [autoplay, setAutoplay] = useState(false);
 
-  const getResource = async (url) => {
-    let res = await fetch(url);
-    try { return await res.json() }
-    catch (err) {
-      new Error(`Could not fetch, status: ${res.status}`)
-    };
-  };
+  const { loading, error, clearError, getImage } = useService();
 
-  const getImage = async (id) => {
-    const res = await getResource(
-      `https://jsonplaceholder.typicode.com/photos/${id}`
-    );
-    return _transformPhoto(res);
-  };
-
-  const _transformPhoto = (photo) => {
-    return {
-      id: photo.id,
-      thumbnailUrl: photo.thumbnailUrl,
-    };
-  };
+  const [{ count }, dispatch] = useReducer(reducer, { count: 1 });
 
   const onImageLoaded = (image) => {
     setImage(image);
-    setLoading(false);
   };
 
-  const onError = () => {
-    setLoading(false);
-    setError(true);
-  }
-
-  const loadImage = (counter) => {
-    setLoading(true);
-
-    getImage(counter)
-      .then(onImageLoaded)
-      .catch(onError);
+  const loadImage = () => {
+    clearError();
+    getImage(count).then(onImageLoaded);
   };
 
   useEffect(() => {
-    loadImage(counter);
-  }, [counter]);
+    loadImage();
+  }, [count]);
 
-  const increaseCounter = () => {
-    if (counter < 20) {
-      setCounter((counter) => counter + 1);
+  // const increaseCounter = () => {
+  //   setAutoplay(false);
+  //   if (counter < 20) {
+  //     setCounter((counter) => counter + 1);
+  //   };
+  // };
+
+  // const decreaseCounter = () => {
+  //   setAutoplay(false);
+  //   if (counter > 1) {
+  //     setCounter((counter) => counter - 1);
+  //   };
+  // };
+
+  // const randomCounter = () => {
+  //   setAutoplay(false);
+  //   setCounter(+(Math.random(counter) * (20 - 1) + 1).toFixed(0));
+  // };
+
+  // const resetCounter = () => {
+  //   setAutoplay(false);
+  //   setCounter(1);
+  // };
+
+  const toggleAutoplay = () => {
+    setAutoplay((autoplay) => !autoplay);
+  }
+
+  useEffect(() => {
+    if (!autoplay) return;
+
+    const interval = setInterval((() => dispatch(setIncrement())), 3000);
+
+    return () => {
+      clearInterval(interval);
     };
-  };
-
-  const decreaseCounter = () => {
-    if (counter > 1) {
-      setCounter((counter) => counter - 1);
-    };
-  };
-
-  const randomCounter = () => {
-    setCounter(+(Math.random(counter) * (20 - 1) + 1).toFixed(0));
-  };
-
-  const resetCounter = () => {
-    setCounter(1);
-  };
+  }, [autoplay]);
 
   if (loading) return <Spinner />;
   if (error) return <ErrorMessage />;
@@ -81,12 +75,13 @@ export const App = () => {
     return (
       <div className="app">
         <img src={image.thumbnailUrl} alt='placeholder-img' className='slide-img' />
-        <div className="counter">{counter}</div>
+        <div className="counter">{count}</div>
         <div className="controls">
-          <button onClick={decreaseCounter}>DEC</button>
-          <button onClick={increaseCounter}>INC</button>
-          <button onClick={randomCounter}>RND</button>
-          <button onClick={resetCounter}>RESET</button>
+          <button onClick={() => dispatch(setDecrement())}>-</button>
+          <button onClick={() => dispatch(setIncrement())}>+</button>
+          <button onClick={() => dispatch(setRandom())}>RND</button>
+          <button onClick={() => dispatch(setReset())}>RESET</button>
+          <button onClick={toggleAutoplay}>AUTOPLAY</button>
         </div>
       </div>
     );
