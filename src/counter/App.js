@@ -1,23 +1,27 @@
 import { useEffect, useState } from 'react';
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { Spinner } from './Spinner';
 import { ErrorMessage } from './ErrorMessage';
 import { useService } from './service';
 
-import * as actions from '../store/actions';
+import { setDecrement, setIncrement, setRandom, setReset } from '../store/actions';
 
 import './App.css';
 
+// В случае с connect:
+// export const App = ({ count, setIncrement, setDecrement, setRandom, setReset }) => {
 
-export const App = ({ count, setIncrement, setDecrement, setRandom, setReset }) => {
+export const App = () => {
 
   // const [counter, setCounter] = useState(1);
   const [image, setImage] = useState(null);
   const [autoplay, setAutoplay] = useState(false);
 
   const { loading, error, clearError, getImage } = useService();
+
+  const count = useSelector((state) => state.count);
+  const dispatch = useDispatch();
 
   // const [{ count }, dispatch] = useReducer(reducer, { count: 1 });
 
@@ -65,7 +69,7 @@ export const App = ({ count, setIncrement, setDecrement, setRandom, setReset }) 
   useEffect(() => {
     if (!autoplay) return;
 
-    const interval = setInterval((setIncrement), 3000);
+    const interval = setInterval(() => dispatch(setIncrement()), 3000);
 
     return () => {
       clearInterval(interval);
@@ -76,14 +80,27 @@ export const App = ({ count, setIncrement, setDecrement, setRandom, setReset }) 
   if (error) return <ErrorMessage />;
   if (image) {
     return (
+      // В случае с connect:
+
+      // <div className="app">
+      //   <img src={image.thumbnailUrl} alt='placeholder-img' className='slide-img' />
+      //   <div className="counter">{count}</div>
+      //   <div className="controls">
+      //     <button onClick={setDecrement}>-</button>
+      //     <button onClick={setIncrement}>+</button>
+      //     <button onClick={setRandom}>RND</button>
+      //     <button onClick={setReset}>RESET</button>
+      //     <button onClick={toggleAutoplay}>AUTOPLAY</button>
+      //   </div>
+      // </div>
       <div className="app">
         <img src={image.thumbnailUrl} alt='placeholder-img' className='slide-img' />
         <div className="counter">{count}</div>
         <div className="controls">
-          <button onClick={setDecrement}>-</button>
-          <button onClick={setIncrement}>+</button>
-          <button onClick={setRandom}>RND</button>
-          <button onClick={setReset}>RESET</button>
+          <button onClick={() => dispatch(setDecrement())}>-</button>
+          <button onClick={() => dispatch(setIncrement())}>+</button>
+          <button onClick={() => dispatch(setRandom())}>RND</button>
+          <button onClick={() => dispatch(setReset())}>RESET</button>
           <button onClick={toggleAutoplay}>AUTOPLAY</button>
         </div>
       </div>
@@ -91,21 +108,23 @@ export const App = ({ count, setIncrement, setDecrement, setRandom, setReset }) 
   };
 };
 
-const mapStateToProps = (state) => {
-  return {
-    count: state.count,
-  };
-};
+// В случае с connect:
 
-const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators(actions, dispatch);
-};
+// const mapStateToProps = (state) => {
+//   return {
+//     count: state.count,
+//   };
+// };
 
-const Container = connect(mapStateToProps, mapDispatchToProps)(App);
+// const mapDispatchToProps = (dispatch) => {
+//   return bindActionCreators(actions, dispatch);
+// };
 
-export default Container;
+// const Container = connect(mapStateToProps, mapDispatchToProps)(App);
 
+// export default Container;
 
+// ----------------------------------------------------------------------------
 
 // export class App extends Component {
 //   constructor(props) {
