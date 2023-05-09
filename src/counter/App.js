@@ -1,14 +1,17 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+
 import { Spinner } from './Spinner';
 import { ErrorMessage } from './ErrorMessage';
 import { useService } from './service';
 
-import { reducer } from '../store/reducer';
-import { setDecrement, setIncrement, setRandom, setReset } from '../store/actions';
+import * as actions from '../store/actions';
 
 import './App.css';
 
-export const App = () => {
+
+export const App = ({ count, setIncrement, setDecrement, setRandom, setReset }) => {
 
   // const [counter, setCounter] = useState(1);
   const [image, setImage] = useState(null);
@@ -16,7 +19,7 @@ export const App = () => {
 
   const { loading, error, clearError, getImage } = useService();
 
-  const [{ count }, dispatch] = useReducer(reducer, { count: 1 });
+  // const [{ count }, dispatch] = useReducer(reducer, { count: 1 });
 
   const onImageLoaded = (image) => {
     setImage(image);
@@ -62,7 +65,7 @@ export const App = () => {
   useEffect(() => {
     if (!autoplay) return;
 
-    const interval = setInterval((() => dispatch(setIncrement())), 3000);
+    const interval = setInterval((setIncrement), 3000);
 
     return () => {
       clearInterval(interval);
@@ -77,16 +80,30 @@ export const App = () => {
         <img src={image.thumbnailUrl} alt='placeholder-img' className='slide-img' />
         <div className="counter">{count}</div>
         <div className="controls">
-          <button onClick={() => dispatch(setDecrement())}>-</button>
-          <button onClick={() => dispatch(setIncrement())}>+</button>
-          <button onClick={() => dispatch(setRandom())}>RND</button>
-          <button onClick={() => dispatch(setReset())}>RESET</button>
+          <button onClick={setDecrement}>-</button>
+          <button onClick={setIncrement}>+</button>
+          <button onClick={setRandom}>RND</button>
+          <button onClick={setReset}>RESET</button>
           <button onClick={toggleAutoplay}>AUTOPLAY</button>
         </div>
       </div>
     );
   };
 };
+
+const mapStateToProps = (state) => {
+  return {
+    count: state.count,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators(actions, dispatch);
+};
+
+const Container = connect(mapStateToProps, mapDispatchToProps)(App);
+
+export default Container;
 
 
 
