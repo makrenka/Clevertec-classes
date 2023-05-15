@@ -1,12 +1,16 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+
 import { Spinner } from './Spinner';
 import { ErrorMessage } from './ErrorMessage';
 import { useService } from './service';
 
-import { reducer } from '../store/reducer';
 import { setDecrement, setIncrement, setRandom, setReset } from '../store/actions';
 
 import './App.css';
+
+// В случае с connect:
+// export const App = ({ count, setIncrement, setDecrement, setRandom, setReset }) => {
 
 export const App = () => {
 
@@ -16,7 +20,10 @@ export const App = () => {
 
   const { loading, error, clearError, getImage } = useService();
 
-  const [{ count }, dispatch] = useReducer(reducer, { count: 1 });
+  const count = useSelector((state) => state.count);
+  const dispatch = useDispatch();
+
+  // const [{ count }, dispatch] = useReducer(reducer, { count: 1 });
 
   const onImageLoaded = (image) => {
     setImage(image);
@@ -62,7 +69,7 @@ export const App = () => {
   useEffect(() => {
     if (!autoplay) return;
 
-    const interval = setInterval((() => dispatch(setIncrement())), 3000);
+    const interval = setInterval(() => dispatch(setIncrement()), 3000);
 
     return () => {
       clearInterval(interval);
@@ -73,6 +80,19 @@ export const App = () => {
   if (error) return <ErrorMessage />;
   if (image) {
     return (
+      // В случае с connect:
+
+      // <div className="app">
+      //   <img src={image.thumbnailUrl} alt='placeholder-img' className='slide-img' />
+      //   <div className="counter">{count}</div>
+      //   <div className="controls">
+      //     <button onClick={setDecrement}>-</button>
+      //     <button onClick={setIncrement}>+</button>
+      //     <button onClick={setRandom}>RND</button>
+      //     <button onClick={setReset}>RESET</button>
+      //     <button onClick={toggleAutoplay}>AUTOPLAY</button>
+      //   </div>
+      // </div>
       <div className="app">
         <img src={image.thumbnailUrl} alt='placeholder-img' className='slide-img' />
         <div className="counter">{count}</div>
@@ -88,7 +108,23 @@ export const App = () => {
   };
 };
 
+// В случае с connect:
 
+// const mapStateToProps = (state) => {
+//   return {
+//     count: state.count,
+//   };
+// };
+
+// const mapDispatchToProps = (dispatch) => {
+//   return bindActionCreators(actions, dispatch);
+// };
+
+// const Container = connect(mapStateToProps, mapDispatchToProps)(App);
+
+// export default Container;
+
+// ----------------------------------------------------------------------------
 
 // export class App extends Component {
 //   constructor(props) {
